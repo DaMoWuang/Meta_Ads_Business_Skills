@@ -1,0 +1,38 @@
+# onboarding 进度跟踪 manifest
+#
+# 由 ad-creation-detector 项目接入引导 自动维护。
+# 每完成 A.X 一步,agent 必须 patch 本文件:
+#   - steps.A.X_*.status = "done"
+#   - steps.A.X_*.completed_at = <ISO8601>
+#   - last_completed = "A.X"
+#
+# 中断恢复 / 新会话切入 onboarding 时,首先 read 本文件确定进度,
+# 从 last_completed 的下一步继续,不需要重新报"我要走 N 步"。
+#
+# status 含义:
+#   - pending     : 未开始
+#   - in_progress : 当前进行中
+#   - done        : 已完成,产出物已写入对应 yaml
+#   - blocked     : 等用户回复信息(单条追问后停在此 step)
+#   - skipped     : 用户明确表态跳过(仅 A.10 cron 注册支持,note 字段记录原因)
+#
+# 各 step 的"产出物"清单见 ad-creation-detector/SKILL.md "A.0–A.9 步骤产出物清单"
+
+instance: ""                # 实例名,如 brand-cc(由 cp 时填入)
+brand: ""                   # 品牌名(由 cp 时填入)
+started_at: ""              # ISO8601 起始时间(由 cp 时填入)
+current_step: ""            # 当前正在执行的 step,如 "A.5_sheet"
+last_completed: ""          # 上次完成的 step,如 "A.4_grouping"
+
+steps:
+  A.0_auth:         { status: "pending", completed_at: "", note: "" }
+  A.1_identity:     { status: "pending", completed_at: "", note: "" }
+  A.2_meta_ids:     { status: "pending", completed_at: "", note: "" }
+  A.3_notification: { status: "pending", completed_at: "", note: "" }
+  A.4_grouping:     { status: "pending", completed_at: "", note: "" }
+  A.5_sheet:        { status: "pending", completed_at: "", note: "" }
+  A.6_naming:       { status: "pending", completed_at: "", note: "" }
+  A.7_audience:     { status: "pending", completed_at: "", note: "" }
+  A.8_defaults:     { status: "pending", completed_at: "", note: "" }
+  A.9_detection:    { status: "pending", completed_at: "", note: "" }
+  A.10_cron:        { status: "pending", completed_at: "", note: "" }   # 默认必走,用户明确表态可跳(标 skipped + note 记原因)

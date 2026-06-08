@@ -1,0 +1,76 @@
+# ====================================================================
+# instance.template.yaml — 广告账户级骨架（一国一份或 global 一份）
+# 用法：cp -r project/instances/_template/ → project/instances/{instance}/
+# 然后在 onboarding 流程中按 A.0–A.4 增量 patch 字段。
+# 字段为空时表示尚未填充；不要预先枚举所有可能值。
+# ====================================================================
+
+# ---- 实例自身 -------------------------------------------------------
+instance_id: ""              # 例：{brand}-{country_code} / {brand}-global
+brand: ""                    # 关联到 project/global/brands/{brand}.yaml
+description: ""              # 一句话说明，例：{Brand} {Country} 广告账户
+
+# ---- 身份（A.1 / A.2 自动 introspect + 用户确认） ------------------
+identity:
+  account_id: ""             # act_xxxxxxxxxxxxx (vhcli project account-token 拿到)
+  account_name: ""           # Meta 后台显示的账户名
+  country_code: ""           # ISO 2 letter，如 SG / JP / GB。global 实例填 GLOBAL
+  currency: ""               # 如 USD / CNY
+  timezone: ""               # IANA 时区，如 Asia/Singapore / Asia/Tokyo / America/Los_Angeles
+  page_id: ""                # Meta API ad_account_get_pages 拉
+  pixel_id: ""               # Meta API ad_account_get_pixels 拉
+  business_id: ""            # 可选
+  instagram_actor_id: ""     # 可选
+
+# ---- 通知通道（飞书等）---------------------------------------------
+notification:
+  feishu:
+    chat_id: ""              # oc_xxxxxxx，用于 detection 报告 / 创建确认
+  # 如有其他通道在此扩展，不要硬编码到 skill
+
+# ---- 数据源(项目接入引导 A.5 询问后填入)----------------------------
+# 至少一个 enabled=true → 日常需求检测自动启用定时检测
+# 全部 enabled=false → 仅支持手动触发(/check 或自然语言)
+detection_sources:
+  - type: sheet
+    enabled: false           # 默认 false,A.5 询问用户后置 true(若有 MP 表格 / 业务清单)
+    config:
+      url: ""                # Google Sheet / 类似清单 URL
+      tab: ""                # tab 名(若适用)
+    note: ""                 # 用户回答记录,如"暂无,可后续补充"
+    added_at: ""             # 后续补充时填入 ISO8601 时间
+
+# ---- 检测排班(A.10 cron 注册时按此生成 jobs.json)--------------------
+# 默认三档:10:10 / 15:00 / 18:30 (Asia/Shanghai)
+# - 10:10 / 18:30: 无论有无新增都发报告卡片(全档发)
+# - 15:00: 仅有新增时发卡片(无新增静默,只写日志)
+# 时间点 / 时区 / 规则均可在接入时由用户调整
+schedule:
+  check_times: ["10:10", "15:00", "18:30"]   # 默认值,用户可改;允许 1-N 档
+  timezone: "Asia/Shanghai"                  # 运营所在时区(可与账户 timezone 不同)
+  rules:                                     # 各 check_time 的发送策略
+    "10:10": "无论有无新增都发报告(green/orange)"
+    "15:00": "仅有新增时发报告(orange);无新增静默仅写日志"
+    "18:30": "无论有无新增都发报告(green/orange)"
+
+  # 隐式周 cron(沉淀文档,默认开启,静默不发卡)
+  weekly_consolidation:
+    enabled: true                            # 默认开启
+    qa_target: "Meta广告执行QA.md"           # 周日 22:00 沉淀 Q&A
+    strategy_target: "project/global/优化师策略库.md"  # 周日 22:10 沉淀策略
+
+# ---- vhcli 关联(用于 token 来源回溯)--------------------------------
+vhcli:
+  customer_project_id: ""    # 如 210，用于 vhcli project account-token
+
+# ---- 分组维度 (A.4 ★ 用户确认) -------------------------------------
+# 不写死叫 product，每个业务自己定。常见取值：
+#   product / creative_type / phase / campaign_type / country (global 实例下) / ...
+group_dimension:
+  name: ""                   # 例：product
+  sheet_field: ""            # sheet 中识别该维度值的列名，如 Model
+  description: ""            # 一句话说明这个维度在业务里代表什么
+  values: []                 # 例：[group_value_a, group_value_b]。每个 value 对应 groups/{value}/
+
+# ---- 跨实例引用 ----------------------------------------------------
+# 每个 group.yaml 内可写 ${parent.identity.account_id} 引用本文件，无需硬编码

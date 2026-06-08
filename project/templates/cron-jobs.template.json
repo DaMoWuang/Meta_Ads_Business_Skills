@@ -1,0 +1,70 @@
+{
+  "_doc": "cron jobs.json 结构模板。接入实例时,agent 在项目接入引导.10 步按此模板 + instance.yaml.schedule 生成具体 jobs,append 到 ~/.openclaw/cron/jobs.json(append 模式,不覆盖其他 instance 的 job)。",
+
+  "_placeholders": {
+    "{instance}": "instance.yaml.instance_id,如 brand-cc",
+    "{time_tag}": "时间紧凑标签 hhmm,如 10:10 → 1010",
+    "{HH:MM}": "时:分原始字符串,如 10:10",
+    "{minute}": "cron 分钟字段,如 10:10 → 10",
+    "{hour}": "cron 小时字段,如 10:10 → 10",
+    "{timezone}": "instance.yaml.schedule.timezone,如 Asia/Shanghai",
+    "{rule_text}": "instance.yaml.schedule.rules['{HH:MM}'],如 '无论有无新增都发报告'",
+    "{command}": "openclaw 平台 cron 调度器实际命令格式 — 落地时由 agent 按真实环境替换。可能是 'skill:ad-creation-detector' 直调,也可能是 shell 命令如 'bash scripts/check_ads.sh {instance}'",
+    "{qa_target}": "instance.yaml.schedule.weekly_consolidation.qa_target",
+    "{strategy_target}": "instance.yaml.schedule.weekly_consolidation.strategy_target"
+  },
+
+  "_template_per_instance_check_time": {
+    "id": "ad_check_{instance}_{time_tag}",
+    "schedule_cron": "{minute} {hour} * * 1-5",
+    "timezone": "{timezone}",
+    "command": "{command}",
+    "params": {
+      "mode": "B",
+      "instance": "{instance}",
+      "trigger_time": "{HH:MM}",
+      "rule": "{rule_text}"
+    },
+    "enabled": true,
+    "description": "{instance} 日常需求检测 检测 - {HH:MM}({rule_text})"
+  },
+
+  "_template_weekly_qa_consolidation": {
+    "id": "weekly_qa_consolidation",
+    "schedule_cron": "0 22 * * 0",
+    "timezone": "Asia/Shanghai",
+    "command": "{command}",
+    "params": {
+      "mode": "weekly_consolidate",
+      "target": "qa",
+      "target_file": "{qa_target}"
+    },
+    "enabled": true,
+    "description": "周日 22:00 沉淀本周 Q&A → {qa_target}(静默,不发卡)"
+  },
+
+  "_template_weekly_strategy_consolidation": {
+    "id": "weekly_strategy_consolidation",
+    "schedule_cron": "10 22 * * 0",
+    "timezone": "Asia/Shanghai",
+    "command": "{command}",
+    "params": {
+      "mode": "weekly_consolidate",
+      "target": "strategy",
+      "target_file": "{strategy_target}"
+    },
+    "enabled": true,
+    "description": "周日 22:10 沉淀本周策略 → {strategy_target}(静默,不发卡)"
+  },
+
+  "_jobs_to_generate_per_instance": [
+    "对 schedule.check_times 中每个时间点生成 1 条 _template_per_instance_check_time(N 条)",
+    "若 schedule.weekly_consolidation.enabled=true 且 jobs.json 中不存在 weekly_qa_consolidation:append _template_weekly_qa_consolidation",
+    "若 schedule.weekly_consolidation.enabled=true 且 jobs.json 中不存在 weekly_strategy_consolidation:append _template_weekly_strategy_consolidation",
+    "weekly_*_consolidation 是工程级单例,不按 instance 重复添加;首个 instance 接入时注册即可,后续 instance 不重复添加"
+  ],
+
+  "_去重规则": "patch 而非 append:若 jobs.json 中已存在相同 id 的 job → 用新的覆盖旧的,不要并存两条同 id 的 job。",
+
+  "_注": "command 字段格式由 openclaw 平台真实 cron 调度器决定 — agent 落地时 read 平台说明或询问用户,把 {command} 占位符替换成实际可执行的命令。其他字段(id / schedule_cron / timezone / params / enabled / description)结构稳定,跨平台基本通用。"
+}

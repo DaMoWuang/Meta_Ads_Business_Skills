@@ -1,0 +1,118 @@
+# ====================================================================
+# group.template.yaml — 分组级骨架（产品/素材类型/投放阶段...）
+# 用法：在 A.4 用户确认分组维度 values 后,对每个 value 执行
+#   cp -r project/instances/_template/groups/_group_template/ \
+#         project/instances/{instance}/groups/{value}/
+# 然后在 A.5–A.9 增量 patch 各段字段。
+# 父级身份字段可用 ${parent.identity.xxx} 引用 instance.yaml,无需复制。
+# ====================================================================
+
+group_id: ""                  # 例：{group_value}（产品 / 素材类型 / 投放阶段...由 instance.group_dimension 决定）
+display_name: ""              # 例：{Group Display Name}
+parent_instance: ""           # 父级 instance_id,引用 instance.yaml(也可由目录推断)
+
+# ====================================================================
+# detection — 检测层(B 阶段使用)
+# 只判"算不算新增",不做经验主义判定;具体在 strategy 段
+# ====================================================================
+detection:
+  sheet:
+    spreadsheet_id: ""        # Google Sheet ID
+    tab_name: ""              # 检测源 tab 名,如 Boost March / New Content
+    gid: 0                    # 数字 gid
+    header_row: 0             # 0-based
+    sub_header_row: null      # 二级表头行,无则 null
+    data_start_row: 0         # 有效数据起始行
+    column_map: {}            # A.3 写: { date: {index: 0, header: "Date"}, ... }
+    detection_rule: ""        # A.9 写: 业务规则的 yaml 表达式
+                              # 例:"budget > 0 AND link contains 'facebook.com' AND not_in_snapshot"
+    link_weight: "highest"    # link 列权重,默认 highest
+    backfill_target:          # B.6 状态回填目标 tab(可选,通常与检测源同 tab)
+      tab_name: ""
+      gid: 0
+      columns: {}
+    naming_reference:         # 命名规范参考 tab(可选)
+      tab_name: ""
+      gid: 0
+      key_columns: {}
+    audience_reference:       # 受众参考 tab(可选)
+      tab_name: ""
+      gid: 0
+
+# ====================================================================
+# strategy — 策略层(A.5–A.7 沉淀,C 阶段创建时使用)
+# ★ 定位:建议默认值 / 倾向 / 参考,不是"必须遵循"
+# Sheet 是 source of truth,sheet 与 strategy 不一致时表单上突出差异让用户确认
+# ====================================================================
+strategy:
+  # ---- 实际跑过的 operation modes(项目接入引导 A.5,从历史行为统计推断)----
+  # 决定日常需求检测 Step 5 选什么表单 / Step 6 调什么 capability
+  operation_modes:
+    primary: "new_campaign"    # 默认 new_campaign(向后兼容);可选:new_campaign / copy_modify / mixed
+                               # new_campaign: 创建型为主(走完整 13 字段表单)
+                               # copy_modify:  修改型为主(走轻量表单 — 复制 / 改 / 换 / 停)
+                               # mixed:        混合型(按本次任务性质动态判)
+    observed: []               # A.5 后台扫描观察到的实际操作类型(开放枚举)
+    # 可能值参考(非穷举):
+    #   new_campaign            每次新建 campaign
+    #   copy_existing           复制已有 campaign 改日期/预算
+    #   add_ad                  在已有 adset 加 ad / 替换素材
+    #   change_creative         换素材(同 ad 换 creative)
+    #   change_audience         换受众(同 campaign 改 adset 受众)
+    #   budget_redistribute     在 campaign 下重分配 adset 预算
+    #   pause_ad                暂停广告(任意层级)
+
+  # ---- 预算层级与策略(A.5)--------------------------------------------
+  budget:
+    level: ""                 # campaign 还是 adset 级,从历史代表性广告字段推断
+    cbo: false                # CBO 开关
+    type: "lifetime"          # lifetime / daily
+    bid_strategy: "LOWEST_COST_WITHOUT_CAP"
+    history_avg: null         # 历史均值,作为表单提示参考(不是硬约束)
+
+  # ---- 版位与 destination(A.5)----------------------------------------
+  placement:
+    mode: "advantage_plus"    # advantage_plus / manual
+    publisher_platforms: []   # 手动版位时的 platforms,如 [facebook, instagram]
+    positions: {}             # 手动版位时具体 positions
+  destination_type:
+    by_objective: {}          # 例: { POST_ENGAGEMENT: ON_POST, THRUPLAY: ON_VIDEO }
+
+  # ---- 命名规范(A.6,反向验证规则)-------------------------------------
+  naming_pattern:
+    template: ""              # 例:BFC_{brand}_{country}_{platform}_{product}_{phase}_{objective}_{format}_{creative}_{start}_{end}_{tier}_{scope}
+    segments: []              # 拆解每段语义,例:[{name: agency, value: "BFC"}, ...]
+    reverse_validate: true    # 是否做反向解析验证(不一致 → 表单标差异,不拦截)
+
+  # ---- 受众解码(A.7)--------------------------------------------------
+  audiences:
+    tiers: {}                 # sheet 简写 → saved_audience_id 映射
+                              # 例: { "<tier_name>": { saved_audience_id: "<id>", targeting_file: "audiences/<tier_name>.json", aa: true, age: [<min>, <max>] } }
+                              # tier 名由该项目业务自定义,初始化包不预设(可能是 Tier_1 / Broad_25_44 / RemarketingHigh 等)
+    fuzzy_match_enabled: true # agent 已有 Meta 后台受众包模糊检索能力,onboarding 期使用
+    custom_packages: []       # 非标 ad-hoc 受众包约定(如有)
+
+# ====================================================================
+# creation — 创建默认值(A.8)
+# 同样是"建议默认值",sheet 当前行有覆盖时表单标差异让用户确认
+# ====================================================================
+creation:
+  defaults:
+    objective: ""             # 例:OUTCOME_ENGAGEMENT
+    optimization_goal: ""     # 例:POST_ENGAGEMENT
+    billing_event: "IMPRESSIONS"
+    aa:                       # Advantage+ Audience 设置
+      enabled_for_non_device: true
+      age_max_when_aa_on: 65  # safety rail #4: AA=ON 必须 age_max=65
+  # 创建后核对项(C.4 自动校验)
+  post_creation_check:
+    - "campaign 4 项参数与表单一致"
+    - "adset destination_type 与 objective 匹配"
+    - "ad creative object_story_id 与表单 link 一致"
+    - "tracking_specs 含 fb_pixel(若需要)"
+    - "所有层级 status=PAUSED"
+
+# ====================================================================
+# notes 引用 — 软约束 / 反直觉点 / 临时踩坑(放 notes/*.md,不写 yaml)
+# ====================================================================
+notes_dir: "notes"            # 相对本 group.yaml 的目录
