@@ -74,7 +74,7 @@ GET /{campaign_id}/adsets?fields=id,name,targeting,optimization_goal,...
 | 职位 / 雇主 | `flexible_spec[].work_positions` / `work_employers` | 标准用法 |
 | 自定义受众 | `targeting.custom_audiences` | 需先在账户内创建 CA |
 | Lookalike | `targeting.custom_audiences`(LAL 也属 CA) | 同上 |
-| **设备定向** | `targeting.user_device` | **非标填写**;需 AA=ON + Manual Placements + age_max=65 才在 Ads Manager UI 显示设备列表;新机型可能在 Meta 设备库延迟收录 |
+| **设备定向** | `targeting.user_device` | **非标填写**;需 AA=ON + Manual Placements 才在 Ads Manager UI 显示设备列表;新机型可能在 Meta 设备库延迟收录 |
 | 地域 | `targeting.geo_locations` | 国家 / 城市 / 邮编 / 半径多种粒度 |
 
 如该项目 tier 中包含设备定向,务必在 group 级 notes 中记录设备列表与 Meta 设备库可用情况。

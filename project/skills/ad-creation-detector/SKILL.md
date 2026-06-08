@@ -401,7 +401,7 @@ Step 5: [有需要操作的项时] 按 operation_modes.primary 选择对应表�
 
   case primary == "new_campaign"(默认,创建型业务):
     → 走完整 13 字段表单(templates/ad-creation-form.md)
-    → 强制阅读 group.yaml.strategy(项目默认值)+ Meta广告执行QA.md(13 条 safety rails)
+    → 强制阅读 group.yaml.strategy(项目默认值)+ Meta广告执行QA.md(12 条 safety rails)
     → 表单上显式标出预算模式 / 预算层级 / 出价策略,让用户对这一行也确认
 
   case primary == "copy_modify"(修改型业务):
@@ -429,7 +429,7 @@ Step 6: 用户**明确文字确认** → 调用底层能力执行(铁则)
      - 操作字段 ← 本次确认表单(详见 [templates/ad-creation-form.md](../../templates/ad-creation-form.md))
      - 默认值 ← `group.yaml.strategy`
      - 账户身份 ← `instance.yaml.identity`
-  4. 13 条 safety rails 见 [Meta广告执行QA.md](../../../Meta广告执行QA.md);创建前/后 review 走 `capability:vh_meta_ads.verify_pre_creation` + `verify_post_creation`
+  4. 12 条 safety rails 见 [Meta广告执行QA.md](../../../Meta广告执行QA.md);创建前/后 review 走 `capability:vh_meta_ads.verify_pre_creation` + `verify_post_creation`
 
   **严禁(任一即违规):**
   - 在本 skill 或 scripts/ 下新写 Python / Node / Bash 脚本调外部 API

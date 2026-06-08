@@ -103,7 +103,6 @@ creation:
     billing_event: "IMPRESSIONS"
     aa:                       # Advantage+ Audience 设置
       enabled_for_non_device: true
-      age_max_when_aa_on: 65  # safety rail #4: AA=ON 必须 age_max=65
   # 创建后核对项(C.4 自动校验)
   post_creation_check:
     - "campaign 4 项参数与表单一致"

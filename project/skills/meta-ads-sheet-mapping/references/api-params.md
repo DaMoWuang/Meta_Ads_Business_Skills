@@ -1,6 +1,6 @@
 # Meta API 参数速查
 
-> 本文件是 Meta Marketing API 通用速查 — 所有项目都适用,**不带任何项目专属示例**。
+> 本文件是 Meta Marketing API 通用**参考速查** — 描述 API 字段结构与典型用法,**不作为强制规则**。具体业务的字段取值、是否启用、参数组合以 `group.yaml.strategy` + 创建前飞书确认表单为准;不同项目可能选择不同的预算模式 / 版位 / 优化目标,此处示例值不应被当作硬性要求。
 > 项目个性化字段值(命名、tier 名、设备列表、custom_audiences 等)由 introspection 习得,落 instance / group 文件。
 
 ## Campaign 创建
@@ -62,7 +62,7 @@ POST /act_{account_id}/adsets
 {
     "geo_locations": {"countries": ["<CC>"], "location_types": ["home", "recent"]},
     "age_min": 18,
-    "age_max": 65,
+    "age_max": 40,
     "user_device": ["<device_model_1>", "<device_model_2>", "..."],
     "user_os": ["Android"],
     "device_platforms": ["mobile", "desktop"],
@@ -74,7 +74,7 @@ POST /act_{account_id}/adsets
 }
 ```
 
-**关键约束**: 使用 `user_device` 时必须 `targeting_automation.advantage_audience=1` + `age_max=65` + Manual Placements,否则设备列表在 Ads Manager UI 中不显示!
+**注意**: 使用 `user_device` 时,通常需要同时配 `targeting_automation.advantage_audience=1` + Manual Placements,否则设备列表在 Ads Manager UI 中可能不显示。具体是否启用以业务需求为准。
 
 ### 再营销定向(Custom Audience)
 ```json
@@ -108,7 +108,7 @@ POST /act_{account_id}/ads
 ## Saved Audience 读取方式
 
 ```python
-# 不能直接传 saved_audience_id! 必须先读后写
+# Meta API 不接受直接传 saved_audience_id;需先读后写
 GET /{saved_audience_id}?fields=id,name,targeting
 # → 取出 targeting 内容,写入 ad set 的 targeting 字段
 ```
@@ -125,5 +125,5 @@ GET /{saved_audience_id}?fields=id,name,targeting
 
 - 单位:美分(cents)
 - $50 → 5000, $100 → 10000, $200 → 20000, $300 → 30000
-- CBO 模式:预算设在 campaign 层级,自动分配到 ad sets
-- Lifetime Budget 必须设 end_time
+- CBO 模式:预算设在 campaign 层级,自动分配到 ad sets;ABO 则每个 ad set 各自分预算
+- Lifetime Budget 需设 `end_time`(否则 API 报错);具体业务用 lifetime 还是 daily 以 group.yaml.strategy 为准

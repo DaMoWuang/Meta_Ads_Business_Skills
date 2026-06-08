@@ -206,8 +206,7 @@ GET /act_{account_id}/saved_audiences?fields=id,name,targeting
 4. **预算单位** — 美分($50 = 5000)
 5. **Creative 来源** — `object_story_id` = `{page_id}_{post_id}`,来自已发布的 Page 帖子
 6. **POST_ENGAGEMENT 特殊要求** — destination_type=ON_POST,AA=ON 时 device 才在 UI 显示
-7. **AA=ON 时 age_max 必须 65** — 否则报错
-8. **Lifetime Budget 必须设 end_time** — 否则报错
+7. **Lifetime Budget 必须设 end_time** — 否则报错
 
 ## 项目个性化(由 introspection 习得,不预设)
 
