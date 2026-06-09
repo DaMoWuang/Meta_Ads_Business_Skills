@@ -73,6 +73,19 @@ scripts/feishu-card.cjs / scripts/vh-auth-card.cjs / scripts/search-audience.sh
 
 ## 三、接入新 agent 的流程
 
+### Step 0:污染自检(必跑)
+
+业务包内不应出现宿主工程目录名的硬编码引用,否则改名 / 移植到其它工作区会失效。接入前在业务包根目录跑:
+
+```bash
+grep -rEn "Meta_Ads_Workspace|Meta_Ads_Business_Skills" \
+  project/ memory/ Meta广告执行QA.md \
+  --include="*.md" --include="*.yaml" --include="*.json" --include="*.py" --include="*.cjs" --include="*.sh"
+# 预期无输出。
+# 仅 README.md / BUSINESS_PACKAGE.md 自述类段落允许出现 Meta_Ads_Business_Skills(本包标题/打包指引),
+# 业务包内的运行时文档(project/ memory/ 等)出现任一前缀即视为污染,需先修复再接入。
+```
+
 ### Step 1:复制业务包到目标 agent 工作区,保持目录结构
 
 ### Step 2:确认目标 agent 已有底层 skill
