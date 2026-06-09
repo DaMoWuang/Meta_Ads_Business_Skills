@@ -30,4 +30,6 @@
 
 - **业务理解报告必沉淀(初始化包预置)** | agent 在项目接入引导 A.5 双线扫描后,只输出"业务理解报告"展示给用户,但未把识别出的规律落到对应 yaml / notes 文件 — 教训:**任何识别出的规律必须沉淀到对应位置**;5 项基础结构(命名 / 预算 / 受众 / 操作模式 / 投放默认值)必出且必落 group.yaml.strategy 对应字段;动态扩展规律(阶段切换 / 素材管理 / 投放节奏等)按内容性质落 group.yaml.notes / 优化师策略库.md。**绝不允许只出报告不落地。**
 
+- **接入期通用教训(删除操作,初始化包预置)** | agent 执行删除操作(campaign/adset/ad/creative_delete 或一次操作含 ≥3 个删除)时,凭口头确认即执行,漏 get 回读 / 漏 spend 快照 / 漏二次确认 / 漏审计落盘 — 教训:**所有删除走 [project/global/SAFETY.md](../project/global/SAFETY.md)**,默认完整 RED 协议(6 步);仅当"本会话创建 + 始终 PAUSED + 零花费 + ≤30min" 4 条全中时走自纠错轻量协议(3 步)。审计写 `project/instances/{instance}/groups/{group}/logs/high-risk-ops.jsonl`。非删除操作不在本条范畴。
+
 <!-- 接入实例后由 agent / 用户在被纠正时追加 -->

@@ -8,6 +8,11 @@
 
 ## ⚠️ 关键约束(12 条 safety rails 来源)
 
+> **与 SAFETY.md 的分工:**
+> 本文 12 条 = Meta API 技术硬约束(跨所有操作类型)
+> [project/global/SAFETY.md](project/global/SAFETY.md) = 删除操作专用安全协议(单删 + 批量删除 ≥3)
+> 删除操作以 SAFETY.md 为准;其它操作沿用本文及各 skill 自带规则。
+
 本文沉淀的是 **Meta API 硬约束**,跨任何业务通用,因此放工程根而非具体 instance/group。下列硬规则必须遵守:
 
 1. **所有创建一律 PAUSED** — Campaign / Ad Set / Ad,人工开启

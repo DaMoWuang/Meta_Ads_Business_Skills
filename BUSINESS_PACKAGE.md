@@ -34,6 +34,7 @@ project/                                       # 业务流程 + 规则 + 实例
 │   └── cron-jobs.template.json
 │
 ├── global/                                    # 业务全局
+│   ├── SAFETY.md                              # 删除操作安全协议 + 自纠错例外
 │   ├── 优化师策略库.md
 │   └── brands/                                # 品牌 anchor(空目录)
 │

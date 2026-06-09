@@ -67,6 +67,8 @@ agent 在 [全量索引] 中按 intent 语义匹配,选信心最高的 sub_capab
 #     sub_capabilities:
 #       - name: <sub_capability_name>
 #         intent: <子能力的具体业务意图>
+#         risk_tier: <RED | 留空表示 SAFE>  # 仅 *_delete 类标 RED,供脚本机读
+#                                            # 权威分级以 project/global/SAFETY.md 为准
 
 # (本段为空,由 agent 首次启动时全局扫描该 agent 的 skills/ 目录后自动填入)
 ```
